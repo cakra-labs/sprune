@@ -469,6 +469,24 @@ func (rs *Store) Commit() types.CommitID {
 	}
 }
 
+func (rs *Store) GetAllVersions() []int {
+
+	versions := []int{}
+
+	for key, store := range rs.stores {
+		if store.GetStoreType() == types.StoreTypeIAVL {
+			// If the store is wrapped with an inter-block cache, we must first unwrap
+			// it to get the underlying IAVL store.
+			store = rs.GetCommitKVStore(key)
+			is := store.(*iavl.Store)
+			versions = is.GetAllVersions()
+			return versions
+		}
+	}
+
+	return versions
+}
+
 // CacheWrap implements CacheWrapper/Store/CommitStore.
 func (rs *Store) CacheWrap() types.CacheWrap {
 	return rs.CacheMultiStore().(types.CacheWrap)

@@ -2,14 +2,17 @@ package pruner
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 
+	"github.com/cakra-labs/sprune/v7/internal/rootmulti"
 	"github.com/cakra-labs/sprune/v7/pkg/app/config"
 	"github.com/cakra-labs/sprune/v7/tools/logger"
 	"github.com/cakra-labs/sprune/v7/types"
 	db "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/state"
 	cometbftstore "github.com/cometbft/cometbft/store"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/neilotoole/errgroup"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
@@ -29,8 +32,50 @@ func NewPruner(cfg *config.Config) Pruner {
 	}
 }
 
-func (p Pruner) PruneAppState() {
+func (p Pruner) PruneAppState(ctx types.Context) error {
+	o := opt.Options{
+		DisableSeeksCompaction: true,
+	}
 
+	// Get BlockStore
+	p.Logger(ctx).Debug("pruning application state")
+	appDB, err := db.NewGoLevelDBWithOpts("application", p.dbDir, &o)
+	if err != nil {
+		return err
+	}
+
+	// Load keys
+	keys := loadKeys()
+
+	appStore := rootmulti.NewStore(appDB, p.Logger(ctx))
+	for _, value := range keys {
+		appStore.MountStoreWithDB(value, storetypes.StoreTypeIAVL, nil)
+	}
+
+	err = appStore.LoadLatestVersion()
+	if err != nil {
+		return err
+	}
+
+	versions := appStore.GetAllVersions()
+	v64 := make([]int64, len(versions))
+	for i := 0; i < len(versions); i++ {
+		v64[i] = int64(versions[i])
+	}
+
+	p.Logger(ctx).Debug(fmt.Sprintf("Version length %d", len(v64)))
+
+	pruningHeights := v64[:len(v64)-int(p.cfg.Blocks)]
+	if err := appStore.PruneStores(false, pruningHeights); err != nil {
+		return err
+	}
+
+	p.Logger(ctx).Debug("compacting application state")
+	if err := appDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p Pruner) PruneBlockState(ctx types.Context) error {
@@ -61,10 +106,11 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 	errs, _ := errgroup.WithContext(context.Background())
 	errs.Go(func() error {
 		p.Logger(ctx).Debug("pruning block store")
-		p.cfg.Blocks, err = blockStore.PruneBlocks(pruneHeight)
+		prunedBlocks, err := blockStore.PruneBlocks(pruneHeight)
 		if err != nil {
 			return err
 		}
+		p.Logger(ctx).Info(fmt.Sprintf("pruned blocks: %d", prunedBlocks))
 
 		p.Logger(ctx).Debug("compacting block store")
 		if err := blockStoreDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
