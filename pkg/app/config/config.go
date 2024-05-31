@@ -1,20 +1,46 @@
 package config
 
-import "gopkg.in/yaml.v2"
+import (
+	"os"
+	"path"
+
+	"gopkg.in/yaml.v2"
+)
 
 type Config struct {
-	HomePath string `yaml:"home_path" json:"home_path"`
+	AppName string
 
+	HomeDir  string
 	DataDir  string `yaml:"data_dir" json:"data_dir"`
-	Backend  string `yaml:"backend" json:"backend"`
-	App      string `yaml:"app" json:"app"`
+	Chain    string `yaml:"chain" json:"chain"`
 	LogLevel string `yaml:"log_level" json:"log_level"`
 
-	CosmosSdk  bool   `yaml:"cosmos_sdk" json:"cosmos_sdk"`
-	Tendermint bool   `yaml:"tendermint" json:"tendermint"`
-	Blocks     uint64 `yaml:"blocks" json:"blocks"`
-	Version    uint64 `yaml:"version" json:"version"`
-	AppName    string
+	AppState     bool   `yaml:"app_state" json:"app_state"`
+	BlockState   bool   `yaml:"block_state" json:"block_state"`
+	BlocksToKeep uint64 `yaml:"blocks_to_keep" json:"blocks_to_keep"`
+}
+
+func CreateConfig(home string) error {
+	cfgPath := path.Join(home, "config.yaml")
+
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		if _, err := os.Stat(home); os.IsNotExist(err) {
+			if err = os.Mkdir(home, os.ModePerm); err != nil {
+				return err
+			}
+		}
+	}
+
+	f, err := os.Create(cfgPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err = f.Write(defaultConfig()); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c Config) MustYAML() []byte {
@@ -23,4 +49,19 @@ func (c Config) MustYAML() []byte {
 		panic(err)
 	}
 	return out
+}
+
+func ValidateConfig(c *Config) error {
+	return nil
+}
+
+func defaultConfig() []byte {
+	return Config{
+		DataDir:      ".gaia",
+		Chain:        "",
+		LogLevel:     "info",
+		AppState:     true,
+		BlockState:   true,
+		BlocksToKeep: 10,
+	}.MustYAML()
 }

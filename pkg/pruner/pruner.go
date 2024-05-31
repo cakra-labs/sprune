@@ -24,7 +24,7 @@ type Pruner struct {
 }
 
 func NewPruner(cfg *config.Config) Pruner {
-	dbDir := rootify(cfg.DataDir, cfg.HomePath)
+	dbDir := rootify(cfg.DataDir, cfg.HomeDir)
 
 	return Pruner{
 		cfg,
@@ -65,7 +65,7 @@ func (p Pruner) PruneAppState(ctx types.Context) error {
 
 	p.Logger(ctx).Debug(fmt.Sprintf("Version length %d", len(v64)))
 
-	pruningHeights := v64[:len(v64)-int(p.cfg.Blocks)]
+	pruningHeights := v64[:len(v64)-int(p.cfg.BlocksToKeep)]
 	if err := appStore.PruneStores(false, pruningHeights); err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 
 	// Define height
 	baseHeight := blockStore.Base()
-	pruneHeight := blockStore.Height() - int64(p.cfg.Blocks)
+	pruneHeight := blockStore.Height() - int64(p.cfg.BlocksToKeep)
 
 	errs, _ := errgroup.WithContext(context.Background())
 	errs.Go(func() error {
