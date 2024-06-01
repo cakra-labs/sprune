@@ -14,7 +14,7 @@ import (
 
 type Logger = cometbftlog.Logger
 
-func NewLogger(cfg config.Config) (Logger, error) {
+func NewLogger(cfg *config.Config) (Logger, error) {
 	var opts []log.Option
 	if cfg.LogLevel != "" {
 		logLvl, err := zerolog.ParseLevel(cfg.LogLevel)

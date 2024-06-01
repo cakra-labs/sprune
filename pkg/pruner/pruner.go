@@ -24,7 +24,7 @@ type Pruner struct {
 }
 
 func NewPruner(cfg *config.Config) Pruner {
-	dbDir := rootify(cfg.DataDir, cfg.RootDir)
+	dbDir := rootify(cfg.DataDir, cfg.ChainDir)
 
 	return Pruner{
 		cfg,
@@ -38,13 +38,14 @@ func (p Pruner) PruneAppState(ctx types.Context) error {
 	}
 
 	// Get BlockStore
-	p.Logger(ctx).Debug("pruning application state")
+	p.Logger(ctx).Debug("pruning application state", "dbDir", p.dbDir)
 	appDB, err := db.NewGoLevelDBWithOpts("application", p.dbDir, &o)
 	if err != nil {
 		return err
 	}
 
 	// Load keys
+	p.Logger(ctx).Debug("load keys")
 	keys := loadKeys()
 
 	appStore := rootmulti.NewStore(appDB, p.Logger(ctx))
@@ -84,6 +85,7 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 	}
 
 	// Get BlockStore
+	p.Logger(ctx).Debug("pruning block state", "dbDir", p.dbDir)
 	blockStoreDB, err := db.NewGoLevelDBWithOpts("blockstore", p.dbDir, &o)
 	if err != nil {
 		return err
@@ -120,7 +122,7 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 		return nil
 	})
 
-	p.Logger(ctx).Debug("pruning state store")
+	p.Logger(ctx).Debug("pruning state store", "baseHeight", baseHeight, "pruneHeight", pruneHeight)
 	err = stateStore.PruneStates(baseHeight, pruneHeight)
 	if err != nil {
 		return err

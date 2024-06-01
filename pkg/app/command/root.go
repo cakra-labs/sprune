@@ -24,7 +24,7 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
-		if err := initConfig(rootCmd, appConfig); err != nil {
+		if err := initConfig(appConfig); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}

@@ -7,7 +7,6 @@ import (
 	"path"
 
 	"github.com/cakra-labs/sprune/v7/pkg/app/config"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -17,17 +16,12 @@ var appConfig = &config.Config{
 	AppName: appName,
 }
 
-func initConfig(cmd *cobra.Command, cfg *config.Config) error {
-	home, err := cmd.PersistentFlags().GetString(flags.FlagHome)
-	if err != nil {
-		return err
-	}
-
+func initConfig(cfg *config.Config) error {
 	// Check config path
-	cfgPath := path.Join(home, "config.yaml")
-	_, err = os.Stat(cfgPath)
+	cfgPath := path.Join(homePath, "config.yaml")
+	_, err := os.Stat(cfgPath)
 	if err != nil {
-		err = config.CreateConfig(home)
+		err = config.CreateConfig(homePath)
 		if err != nil {
 			return err
 		}

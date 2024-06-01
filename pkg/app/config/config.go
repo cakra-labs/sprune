@@ -10,7 +10,7 @@ import (
 type Config struct {
 	AppName string `yaml:"-" json:"-"`
 
-	RootDir  string `yaml:"root_dir" json:"root_dir"`
+	ChainDir string `yaml:"chain_dir" json:"chain_dir"`
 	DataDir  string `yaml:"data_dir" json:"data_dir"`
 	Chain    string `yaml:"chain" json:"chain"`
 	LogLevel string `yaml:"log_level" json:"log_level"`
@@ -57,8 +57,8 @@ func ValidateConfig(c *Config) error {
 
 func defaultConfig() []byte {
 	return Config{
-		RootDir:      "$HOME",
-		DataDir:      ".gaia",
+		ChainDir:     "/home/user/.gaia",
+		DataDir:      "data",
 		Chain:        "",
 		LogLevel:     "info",
 		AppState:     true,
