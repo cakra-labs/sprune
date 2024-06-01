@@ -63,6 +63,6 @@ func defaultConfig() []byte {
 		LogLevel:     "info",
 		AppState:     true,
 		BlockState:   true,
-		BlocksToKeep: 10,
+		BlocksToKeep: 100,
 	}.MustYAML()
 }

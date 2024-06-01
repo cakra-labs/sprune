@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "sprune/v7.0.0"
-
 var (
 	homePath    string
 	defaultHome = os.ExpandEnv("$HOME/.sprune")
