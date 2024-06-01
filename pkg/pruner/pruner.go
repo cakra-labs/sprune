@@ -24,7 +24,7 @@ type Pruner struct {
 }
 
 func NewPruner(cfg *config.Config) Pruner {
-	dbDir := rootify(cfg.DataDir, cfg.HomeDir)
+	dbDir := rootify(cfg.DataDir, cfg.RootDir)
 
 	return Pruner{
 		cfg,

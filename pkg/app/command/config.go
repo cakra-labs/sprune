@@ -1,6 +1,7 @@
 package command
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -13,7 +14,7 @@ import (
 )
 
 var appConfig = &config.Config{
-	AppName: "Sprune",
+	AppName: appName,
 }
 
 func initConfig(cmd *cobra.Command, cfg *config.Config) error {
@@ -56,4 +57,22 @@ func initConfig(cmd *cobra.Command, cfg *config.Config) error {
 		os.Exit(1)
 	}
 	return nil
+}
+
+func configCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "config",
+		Short: "validate and show config",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// print to json
+			b, err := json.MarshalIndent(appConfig, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(b))
+
+			return nil
+		},
+	}
+	return cmd
 }

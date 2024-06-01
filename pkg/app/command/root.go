@@ -13,13 +13,8 @@ const VERSION = "sprune/v7.0.0"
 
 var (
 	homePath    string
-	blocks      uint64
-	versions    uint64
-	chain       string
-	appState    bool
-	blockState  bool
 	defaultHome = os.ExpandEnv("$HOME/.sprune")
-	appName     = "sprune"
+	appName     = "Sprune"
 )
 
 func NewRootCmd() *cobra.Command {
@@ -30,7 +25,8 @@ func NewRootCmd() *cobra.Command {
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
 		if err := initConfig(rootCmd, appConfig); err != nil {
-			return err
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
 		return nil
@@ -42,28 +38,9 @@ func NewRootCmd() *cobra.Command {
 		os.Exit(1)
 	}
 
-	// rootCmd.PersistentFlags().Uint64VarP(&blocks, "blocks", "b", 10, "set the amount of blocks to keep (default=10)")
-	// if err := viper.BindPFlag("blocks", rootCmd.PersistentFlags().Lookup("blocks")); err != nil {
-	// 	panic(err)
-	// }
-
-	// rootCmd.PersistentFlags().StringVar(&chain, "chain", "", "set the app you are pruning (supported apps: osmosis)")
-	// if err := viper.BindPFlag("chain", rootCmd.PersistentFlags().Lookup("chain")); err != nil {
-	// 	panic(err)
-	// }
-
-	// rootCmd.PersistentFlags().BoolVar(&appState, "app-state", true, "set to false if using only with tendermint (default true)")
-	// if err := viper.BindPFlag("app-state", rootCmd.PersistentFlags().Lookup("app-state")); err != nil {
-	// 	panic(err)
-	// }
-
-	// rootCmd.PersistentFlags().BoolVar(&blockState, "block-state", true, "set to false you dont want to prune tendermint data(default true)")
-	// if err := viper.BindPFlag("block-state", rootCmd.PersistentFlags().Lookup("block-state")); err != nil {
-	// 	panic(err)
-	// }
-
 	rootCmd.AddCommand(
-	// pruneCmd(),
+		configCmd(),
+		pruneCmd(),
 	)
 
 	return rootCmd
