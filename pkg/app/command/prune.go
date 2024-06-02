@@ -10,7 +10,7 @@ import (
 func pruneCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "prune",
-		Short: "prune data from the application store and block store",
+		Short: "Prune data from the block store and app store",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger, err := logger.NewLogger(appConfig)
 			if err != nil {

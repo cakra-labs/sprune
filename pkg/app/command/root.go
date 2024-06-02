@@ -12,13 +12,13 @@ import (
 var (
 	homePath    string
 	defaultHome = os.ExpandEnv("$HOME/.sprune")
-	appName     = "Sprune"
+	appName     = "sprune"
 )
 
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   appName,
-		Short: "sprune is meant to prune data base history from a cosmos application, avoiding needing to state sync every couple amount of weeks",
+		Short: "Sprune prunes database history in a Cosmos application, eliminating the need for frequent state synchronizations",
 	}
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {

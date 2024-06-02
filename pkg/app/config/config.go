@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -52,6 +53,14 @@ func (c Config) MustYAML() []byte {
 }
 
 func ValidateConfig(c *Config) error {
+	_, err := os.Stat(c.ChainDir)
+	if err != nil {
+		return err
+	}
+
+	if c.BlocksToKeep < 100 {
+		return fmt.Errorf("minimum blocks to keep %d", 100)
+	}
 	return nil
 }
 
@@ -60,7 +69,7 @@ func defaultConfig() []byte {
 		ChainDir:     "/home/user/.gaia",
 		DataDir:      "data",
 		Chain:        "",
-		LogLevel:     "info",
+		LogLevel:     "debug",
 		AppState:     true,
 		BlockState:   true,
 		BlocksToKeep: 100,

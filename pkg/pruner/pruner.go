@@ -105,35 +105,39 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 	baseHeight := blockStore.Base()
 	pruneHeight := blockStore.Height() - int64(p.cfg.BlocksToKeep)
 
-	errs, _ := errgroup.WithContext(context.Background())
-	errs.Go(func() error {
-		p.Logger(ctx).Debug("pruning block store")
+	g, _ := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		p.Logger(ctx).Debug("pruning block store", "pruneHeight", pruneHeight)
 		prunedBlocks, err := blockStore.PruneBlocks(pruneHeight)
 		if err != nil {
 			return err
 		}
-		p.Logger(ctx).Info(fmt.Sprintf("pruned blocks: %d", prunedBlocks))
 
 		p.Logger(ctx).Debug("compacting block store")
 		if err := blockStoreDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
 			return err
 		}
 
+		p.Logger(ctx).Info(fmt.Sprintf("pruned blocks: %d", prunedBlocks))
+
 		return nil
 	})
 
-	p.Logger(ctx).Debug("pruning state store", "baseHeight", baseHeight, "pruneHeight", pruneHeight)
-	err = stateStore.PruneStates(baseHeight, pruneHeight)
-	if err != nil {
-		return err
-	}
+	g.Go(func() error {
+		p.Logger(ctx).Debug("pruning state store", "baseHeight", baseHeight, "pruneHeight", pruneHeight)
+		if err := stateStore.PruneStates(baseHeight, pruneHeight); err != nil {
+			return err
+		}
 
-	p.Logger(ctx).Debug("compacting state store")
-	if err := stateDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
-		return err
-	}
+		p.Logger(ctx).Debug("compacting state store")
+		if err := stateDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
+			return err
+		}
 
-	return nil
+		return nil
+	})
+
+	return g.Wait()
 }
 
 func (p Pruner) Logger(ctx types.Context) logger.Logger {

@@ -40,13 +40,13 @@ func initConfig(cfg *config.Config) error {
 		os.Exit(1)
 	}
 
-	if err = yaml.Unmarshal(file, cfg); err != nil {
+	if err := yaml.Unmarshal(file, cfg); err != nil {
 		fmt.Println("Error unmarshalling config:", err)
 		os.Exit(1)
 	}
 
 	// Validate configuration
-	if err = config.ValidateConfig(cfg); err != nil {
+	if err := config.ValidateConfig(cfg); err != nil {
 		fmt.Println("Error parsing chain config:", err)
 		os.Exit(1)
 	}
@@ -56,7 +56,7 @@ func initConfig(cfg *config.Config) error {
 func configCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
-		Short: "validate and show config",
+		Short: "Validate and show config",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// print to json
 			b, err := json.MarshalIndent(appConfig, "", "  ")
