@@ -22,7 +22,7 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 )
 
-func loadKeys() map[string]*types.KVStoreKey {
+func loadKeys(chain string) map[string]*types.KVStoreKey {
 	keys := sdk.NewKVStoreKeys(
 		authtypes.StoreKey,
 		banktypes.StoreKey,

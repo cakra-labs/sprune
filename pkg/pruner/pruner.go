@@ -46,7 +46,7 @@ func (p Pruner) PruneAppState(ctx types.Context) error {
 
 	// Load keys
 	p.Logger(ctx).Debug("load keys")
-	keys := loadKeys()
+	keys := loadKeys(p.cfg.Chain)
 
 	appStore := rootmulti.NewStore(appDB, p.Logger(ctx))
 	for _, value := range keys {
@@ -64,19 +64,26 @@ func (p Pruner) PruneAppState(ctx types.Context) error {
 		v64[i] = int64(versions[i])
 	}
 
-	p.Logger(ctx).Debug(fmt.Sprintf("Version length %d", len(v64)))
-
 	pruningHeights := v64[:len(v64)-int(p.cfg.BlocksToKeep)]
-	if err := appStore.PruneStores(false, pruningHeights); err != nil {
-		return err
-	}
 
-	p.Logger(ctx).Debug("compacting application state")
-	if err := appDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
-		return err
-	}
+	g, _ := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		p.Logger(ctx).Info("pruning app store", "versionLenght", len(v64))
+		if err := appStore.PruneStores(false, pruningHeights); err != nil {
+			return err
+		}
 
-	return nil
+		p.Logger(ctx).Debug("compacting application state")
+		if err := appDB.DB().CompactRange(util.Range{Start: nil, Limit: nil}); err != nil {
+			return err
+		}
+
+		p.Logger(ctx).Info(fmt.Sprintf("pruned app stores: %d", len(pruningHeights)))
+
+		return nil
+	})
+
+	return g.Wait()
 }
 
 func (p Pruner) PruneBlockState(ctx types.Context) error {
@@ -107,7 +114,7 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		p.Logger(ctx).Debug("pruning block store", "pruneHeight", pruneHeight)
+		p.Logger(ctx).Info("pruning block store", "pruneHeight", pruneHeight)
 		prunedBlocks, err := blockStore.PruneBlocks(pruneHeight)
 		if err != nil {
 			return err
@@ -124,7 +131,7 @@ func (p Pruner) PruneBlockState(ctx types.Context) error {
 	})
 
 	g.Go(func() error {
-		p.Logger(ctx).Debug("pruning state store", "baseHeight", baseHeight, "pruneHeight", pruneHeight)
+		p.Logger(ctx).Info("pruning state store", "baseHeight", baseHeight, "pruneHeight", pruneHeight)
 		if err := stateStore.PruneStates(baseHeight, pruneHeight); err != nil {
 			return err
 		}
