@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/cakra-labs/sprune/v7/pkg/app/command"
+	"github.com/cakra-labs/sprune/pkg/app/command"
 	"github.com/spf13/cobra"
 )
 

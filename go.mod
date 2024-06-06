@@ -1,6 +1,6 @@
-module github.com/cakra-labs/sprune/v7
+module github.com/cakra-labs/sprune
 
-go 1.21.0
+go 1.21
 
 require (
 	cosmossdk.io/log v1.3.1

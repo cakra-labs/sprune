@@ -1,6 +1,6 @@
 package main
 
-import "github.com/cakra-labs/sprune/v7/pkg/app"
+import "github.com/cakra-labs/sprune/pkg/app"
 
 func main() {
 	app.Run()

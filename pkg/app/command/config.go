@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/cakra-labs/sprune/v7/pkg/app/config"
+	"github.com/cakra-labs/sprune/pkg/app/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"

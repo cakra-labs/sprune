@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/cakra-labs/sprune/v7/pkg/pruner"
-	"github.com/cakra-labs/sprune/v7/tools/logger"
-	"github.com/cakra-labs/sprune/v7/types"
+	"github.com/cakra-labs/sprune/pkg/pruner"
+	"github.com/cakra-labs/sprune/tools/logger"
+	"github.com/cakra-labs/sprune/types"
 	"github.com/spf13/cobra"
 )
 
