@@ -43,5 +43,15 @@ func loadKeys(chain string) map[string]*types.KVStoreKey {
 		ibctransfertypes.StoreKey,
 	)
 
+	chains := getChains()
+	listKeys := chains[chain]
+
+	if len(listKeys) > 0 {
+		chainKeys := sdk.NewKVStoreKeys(listKeys...)
+		for key, value := range chainKeys {
+			keys[key] = value
+		}
+	}
+
 	return keys
 }
