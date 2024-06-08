@@ -4,6 +4,8 @@ The goal of this project is to prune a Tendermint/CometBFT database of blocks an
 
 This tool works with a subset of modules. While an application may have modules outside the scope of this tool, Sprune will prune the default SDK module and custom application module.
 
+This tool is a refactored and modified version of the original [Cosmprund](https://github.com/binaryholdings/cosmprund).
+
 ## How to Use
 Sprune works on a data directory with the same structure as a normal Cosmos SDK/Tendermint node. By default, it will prune all but 100 blocks from Tendermint and all but 10 versions of application state.
 
