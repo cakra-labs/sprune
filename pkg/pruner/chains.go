@@ -25,8 +25,11 @@ var chains = []Chain{
 	{
 		name: "cosmoshub",
 		keys: []string{
-			"liquidity",
-			"icahost", // icahosttypes.StoreKey
+			"icahost",                // icahosttypes.StoreKey
+			"icacontroller",          // icacontrollertypes.StoreKey
+			"packetfowardmiddleware", // routertypes.StoreKey
+			"ratelimit",              // ratelimittypes.StoreKey
+			"provider",               // providertypes.StoreKey
 		},
 	},
 	{
